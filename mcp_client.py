@@ -22,23 +22,15 @@ AVIATION_STACK_API_KEY = os.getenv("AVIATIONSTACK_API_KEY")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 WEATHER_MCP_URL = os.getenv("WEATHER_MCP_URL")
-
+MCP_AUTH_TOKEN = os.getenv('MCP_AUTH_TOKEN')
 # Automatically find the current project folder.
 # This replaces the hard-coded Windows paths.
 PROJECT_DIR = Path(__file__).resolve().parent
-WEATHER_SERVER_PATH = PROJECT_DIR / "custom_weather_mcp_server.py"
-
-
 # Preserve the complete Windows environment when starting
 # local stdio MCP servers.
 AVIATION_ENV = os.environ.copy()
 AVIATION_ENV["AVIATION_STACK_API_KEY"] = (
     AVIATION_STACK_API_KEY or ""
-)
-
-WEATHER_ENV = os.environ.copy()
-WEATHER_ENV["OPENWEATHER_API_KEY"] = (
-    OPENWEATHER_API_KEY or ""
 )
 
 
@@ -78,13 +70,9 @@ client = MultiServerMCPClient(
         "weather": {
             "transport": "streamable_http",
             "url": WEATHER_MCP_URL,
-            # Automatically use custom_weather_mcp_server.py
-            # from the current project directory.
-            "args": [
-                str(WEATHER_SERVER_PATH)
-            ],
-
-            "env": WEATHER_ENV
+            "headers":{
+                "Authorization":f"Bearer {MCP_AUTH_TOKEN}"
+            }
         }
     }
 )
@@ -268,11 +256,6 @@ async def initialize_weather_tools():
     ):
         return
 
-    if not WEATHER_SERVER_PATH.exists():
-        raise FileNotFoundError(
-            "Weather MCP server file was not found: "
-            f"{WEATHER_SERVER_PATH}"
-        )
 
     # Load only Weather.
     # Tavily and AviationStack will not be started.
