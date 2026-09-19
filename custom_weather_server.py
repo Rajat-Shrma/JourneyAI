@@ -8,14 +8,7 @@ from fastmcp import FastMCP
 from fastmcp.server.auth import StaticTokenVerifier
 
 
-# ============================================================
-# Configuration
-# ============================================================
-
 BASE_DIR = Path(__file__).resolve().parent
-
-# Loads .env locally.
-# FastMCP Cloud will provide environment variables directly.
 load_dotenv(BASE_DIR / ".env")
 
 
@@ -29,20 +22,17 @@ REQUEST_TIMEOUT_SECONDS = 20
 # Authentication
 # ============================================================
 
-if not MCP_AUTH_TOKEN:
-    raise RuntimeError(
-        "MCP_AUTH_TOKEN is missing."
-    )
+auth = None
 
-
-auth = StaticTokenVerifier(
-    tokens={
-        MCP_AUTH_TOKEN: {
-            "client_id": "weather-client",
-            "sub": "weather-client",
+if MCP_AUTH_TOKEN:
+    auth = StaticTokenVerifier(
+        tokens={
+            MCP_AUTH_TOKEN: {
+                "client_id": "weather-client",
+                "sub": "weather-client",
+            }
         }
-    }
-)
+    )
 
 
 # ============================================================
@@ -53,7 +43,6 @@ mcp = FastMCP(
     name="Weather MCP Server",
     auth=auth,
 )
-
 
 # ============================================================
 # Helpers
